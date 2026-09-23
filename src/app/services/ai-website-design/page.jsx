@@ -4,6 +4,10 @@ import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import ProblemSection from "./what's-include/page";
+import HowItWorksSection from "./how-it-works/page";
+import ComparisonSection from "./why-piniola-agency/page";
+import FAQSection from "./faq-section/page";
+import CTASection from "./ready-to-launch/page";
 
 export default function HeroSection() {
   // Animation Variants
@@ -211,6 +215,10 @@ export default function HeroSection() {
       </motion.div>
     </section>
     <ProblemSection></ProblemSection>
+    <HowItWorksSection></HowItWorksSection>
+    <ComparisonSection></ComparisonSection>
+    <FAQSection></FAQSection>
+    <CTASection></CTASection>
     </>
   );
 }
