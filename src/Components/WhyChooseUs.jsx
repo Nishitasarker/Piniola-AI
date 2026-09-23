@@ -42,7 +42,7 @@ export default function WhyChooseUs() {
     e.preventDefault();
 
     // আপনার হোয়াটসঅ্যাপ নম্বর (বাংলাদেশি কান্ট্রি কোড +88 সহ)
-    const myWhatsAppNumber = "8801859384536";
+    const myWhatsAppNumber = "8801602030870";
 
     // মেসেজ ফরম্যাট করা
     const text = `*New Lead from Piniola AI*%0A%0A` +

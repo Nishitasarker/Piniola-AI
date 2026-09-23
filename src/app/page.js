@@ -3,6 +3,7 @@ import Hero from "@/Components/Hero";
 import FeaturesPage from "@/Components/Features";
 import PricingPackagesPage from "@/Components/Packages";
 import WhyChooseUs from "@/Components/WhyChooseUs";
+import FAQ from "@/Components/FAQ";
 
 export default function Home() {
   return (
@@ -11,6 +12,7 @@ export default function Home() {
      <FeaturesPage></FeaturesPage>
      <PricingPackagesPage></PricingPackagesPage>
      <WhyChooseUs></WhyChooseUs>
+     <FAQ></FAQ>
     </div>
   );
 }

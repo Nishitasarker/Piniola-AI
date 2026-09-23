@@ -3,12 +3,20 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Navbar() {
+  const pathname = usePathname();
   const [activeHoverMenu, setActiveHoverMenu] = useState(null); // Desktop Hover State
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // Mobile Menu State
   const [mobileServicesOpen, setMobileServicesOpen] = useState(false); // Mobile Services Accordion
   const [mobileCaseStudiesOpen, setMobileCaseStudiesOpen] = useState(false); // Mobile Case Studies Accordion
+
+  // Active Link Helper Functions
+  const isActive = (path) => pathname === path;
+  const isServicesActive = () => pathname.startsWith("/services");
+  const isCaseStudiesActive = () => pathname.startsWith("/case-studies");
 
   // 1. SERVICES DATA
   const servicesList = [
@@ -17,7 +25,7 @@ export default function Navbar() {
       desc: "Conversion-optimized AI websites",
       icon: (
         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.8" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m-9 9a9 9 0 019-9" />
         </svg>
       ),
       href: "/services/ai-website-design",
@@ -187,9 +195,9 @@ export default function Navbar() {
           {/* BRAND LOGO */}
           <div className="flex-shrink-0">
             <Link href="/" className="flex items-center gap-2.5">
-              <div className="relative w-9 h-9">
+              <div className="relative w-12 h-12">
                 <Image
-                  src="/piniola-logo.png"
+                  src="/Piniola-Logo.jpeg"
                   alt="PINIOLA AI Logo"
                   fill
                   className="object-contain"
@@ -215,11 +223,16 @@ export default function Navbar() {
               onMouseEnter={() => setActiveHoverMenu("services")}
               onMouseLeave={() => setActiveHoverMenu(null)}
             >
-              <button className="flex items-center gap-1.5 text-[15px] font-semibold text-[#002B66] hover:text-[#2BB673] transition-colors">
+              <Link 
+                href="/services"
+                className={`flex items-center gap-1.5 text-[15px] font-semibold transition-colors ${
+                  isServicesActive() ? "text-[#2BB673]" : "text-[#002B66] hover:text-[#2BB673]"
+                }`}
+              >
                 Services
                 <svg
                   className={`w-4 h-4 transition-transform duration-200 ${
-                    activeHoverMenu === "services" ? "rotate-180 text-[#2BB673]" : "text-gray-400"
+                    activeHoverMenu === "services" ? "rotate-180 text-[#2BB673]" : isServicesActive() ? "text-[#2BB673]" : "text-gray-400"
                   }`}
                   fill="none"
                   stroke="currentColor"
@@ -227,41 +240,74 @@ export default function Navbar() {
                 >
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                 </svg>
-              </button>
+              </Link>
 
-              {activeHoverMenu === "services" && (
-                <div className="absolute top-[85%] left-[-20px] w-[680px] bg-white rounded-2xl shadow-2xl border border-gray-100 p-6 z-50">
-                  <div className="text-xs font-bold tracking-wider text-gray-400 uppercase mb-4 px-2">
-                    Our Services
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    {servicesList.map((service, idx) => (
-                      <Link
-                        key={idx}
-                        href={service.href}
-                        className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-[#002B66]/5 transition-all group"
-                      >
-                        <div className="p-2 rounded-lg bg-gray-50 text-[#002B66] group-hover:bg-[#002B66] group-hover:text-white transition-colors flex-shrink-0">
-                          {service.icon}
-                        </div>
-                        <div>
-                          <h4 className="text-sm font-bold text-[#002B66] group-hover:text-[#2BB673] transition-colors leading-tight">
-                            {service.title}
-                          </h4>
-                          <p className="text-xs text-gray-500 mt-0.5 leading-snug">{service.desc}</p>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <AnimatePresence>
+                {activeHoverMenu === "services" && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute top-[85%] left-[-20px] w-[680px] bg-white rounded-2xl shadow-2xl border border-gray-100 p-6 z-50"
+                  >
+                    <div className="text-xs font-bold tracking-wider text-gray-400 uppercase mb-4 px-2">
+                      Our Services
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {servicesList.map((service, idx) => {
+                        const isSubActive = isActive(service.href);
+                        return (
+                          <Link
+                            key={idx}
+                            href={service.href}
+                            className={`flex items-start gap-3 p-2.5 rounded-xl transition-all group ${
+                              isSubActive 
+                                ? "bg-[#002B66]/10 border border-[#2BB673]/30" 
+                                : "hover:bg-[#002B66]/5"
+                            }`}
+                          >
+                            <div className={`p-2 rounded-lg transition-colors flex-shrink-0 ${
+                              isSubActive 
+                                ? "bg-[#2BB673] text-white" 
+                                : "bg-gray-50 text-[#002B66] group-hover:bg-[#002B66] group-hover:text-white"
+                            }`}>
+                              {service.icon}
+                            </div>
+                            <div>
+                              <h4 className={`text-sm font-bold transition-colors leading-tight ${
+                                isSubActive 
+                                  ? "text-[#2BB673]" 
+                                  : "text-[#002B66] group-hover:text-[#2BB673]"
+                              }`}>
+                                {service.title}
+                              </h4>
+                              <p className="text-xs text-gray-500 mt-0.5 leading-snug">{service.desc}</p>
+                            </div>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
-            <Link href="/brand-onboarding" className="text-[15px] font-semibold text-[#002B66] hover:text-[#2BB673] transition-colors">
+            <Link 
+              href="/brand-onboarding" 
+              className={`text-[15px] font-semibold transition-colors ${
+                isActive("/brand-onboarding") ? "text-[#2BB673]" : "text-[#002B66] hover:text-[#2BB673]"
+              }`}
+            >
               Brand Onboarding
             </Link>
 
-            <Link href="/free-audit" className="text-[15px] font-semibold text-[#002B66] hover:text-[#2BB673] transition-colors">
+            <Link 
+              href="/free-audit" 
+              className={`text-[15px] font-semibold transition-colors ${
+                isActive("/free-audit") ? "text-[#2BB673]" : "text-[#002B66] hover:text-[#2BB673]"
+              }`}
+            >
               Free Audit
             </Link>
 
@@ -271,11 +317,15 @@ export default function Navbar() {
               onMouseEnter={() => setActiveHoverMenu("case-studies")}
               onMouseLeave={() => setActiveHoverMenu(null)}
             >
-              <button className="flex items-center gap-1.5 text-[15px] font-semibold text-[#002B66] hover:text-[#2BB673] transition-colors">
+              <button 
+                className={`flex items-center gap-1.5 text-[15px] font-semibold transition-colors ${
+                  isCaseStudiesActive() ? "text-[#2BB673]" : "text-[#002B66] hover:text-[#2BB673]"
+                }`}
+              >
                 Case Studies
                 <svg
                   className={`w-4 h-4 transition-transform duration-200 ${
-                    activeHoverMenu === "case-studies" ? "rotate-180 text-[#2BB673]" : "text-gray-400"
+                    activeHoverMenu === "case-studies" ? "rotate-180 text-[#2BB673]" : isCaseStudiesActive() ? "text-[#2BB673]" : "text-gray-400"
                   }`}
                   fill="none"
                   stroke="currentColor"
@@ -285,48 +335,86 @@ export default function Navbar() {
                 </svg>
               </button>
 
-              {activeHoverMenu === "case-studies" && (
-                <div className="absolute top-[85%] left-[-80px] w-[420px] bg-white rounded-2xl shadow-2xl border border-gray-100 p-5 z-50">
-                  <div className="text-xs font-bold tracking-wider text-gray-400 uppercase mb-3 px-2">
-                    Case Studies
-                  </div>
-                  <div className="space-y-1">
-                    {caseStudiesList.map((item, idx) => (
-                      <Link
-                        key={idx}
-                        href={item.href}
-                        className="flex items-center justify-between p-2.5 rounded-xl hover:bg-[#002B66]/5 transition-all group"
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="p-2 rounded-full bg-gray-50 text-[#002B66] group-hover:bg-[#002B66] group-hover:text-white transition-colors flex-shrink-0">
-                            {item.icon}
-                          </div>
-                          <div>
-                            <h4 className="text-sm font-bold text-[#002B66] group-hover:text-[#2BB673] transition-colors leading-tight">
-                              {item.company}
-                            </h4>
-                            <p className="text-xs text-gray-400 font-medium mt-0.5">
-                              {item.result}
-                            </p>
-                          </div>
-                        </div>
-                        <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${item.badgeStyle}`}>
-                          {item.badge}
-                        </span>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
+              <AnimatePresence>
+                {activeHoverMenu === "case-studies" && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute top-[85%] left-[-80px] w-[420px] bg-white rounded-2xl shadow-2xl border border-gray-100 p-5 z-50"
+                  >
+                    <div className="text-xs font-bold tracking-wider text-gray-400 uppercase mb-3 px-2">
+                      Case Studies
+                    </div>
+                    <div className="space-y-1">
+                      {caseStudiesList.map((item, idx) => {
+                        const isSubActive = isActive(item.href);
+                        return (
+                          <Link
+                            key={idx}
+                            href={item.href}
+                            className={`flex items-center justify-between p-2.5 rounded-xl transition-all group ${
+                              isSubActive 
+                                ? "bg-[#002B66]/10 border border-[#2BB673]/30" 
+                                : "hover:bg-[#002B66]/5"
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <div className={`p-2 rounded-full transition-colors flex-shrink-0 ${
+                                isSubActive 
+                                  ? "bg-[#2BB673] text-white" 
+                                  : "bg-gray-50 text-[#002B66] group-hover:bg-[#002B66] group-hover:text-white"
+                              }`}>
+                                {item.icon}
+                              </div>
+                              <div>
+                                <h4 className={`text-sm font-bold transition-colors leading-tight ${
+                                  isSubActive 
+                                    ? "text-[#2BB673]" 
+                                    : "text-[#002B66] group-hover:text-[#2BB673]"
+                                }`}>
+                                  {item.company}
+                                </h4>
+                                <p className="text-xs text-gray-400 font-medium mt-0.5">
+                                  {item.result}
+                                </p>
+                              </div>
+                            </div>
+                            <span className={`text-[11px] font-bold px-2.5 py-1 rounded-full ${item.badgeStyle}`}>
+                              {item.badge}
+                            </span>
+                          </Link>
+                        );
+                      })}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
-            <Link href="/blog" className="text-[15px] font-semibold text-[#002B66] hover:text-[#2BB673] transition-colors">
+            <Link 
+              href="/blog" 
+              className={`text-[15px] font-semibold transition-colors ${
+                isActive("/blog") ? "text-[#2BB673]" : "text-[#002B66] hover:text-[#2BB673]"
+              }`}
+            >
               Blog
             </Link>
-            <Link href="/careers" className="text-[15px] font-semibold text-[#002B66] hover:text-[#2BB673] transition-colors">
+            <Link 
+              href="/careers" 
+              className={`text-[15px] font-semibold transition-colors ${
+                isActive("/careers") ? "text-[#2BB673]" : "text-[#002B66] hover:text-[#2BB673]"
+              }`}
+            >
               Careers
             </Link>
-            <Link href="/book-consultation" className="text-[15px] font-semibold text-[#002B66] hover:text-[#2BB673] transition-colors">
+            <Link 
+              href="/book-consultation" 
+              className={`text-[15px] font-semibold transition-colors ${
+                isActive("/book-consultation") ? "text-[#2BB673]" : "text-[#002B66] hover:text-[#2BB673]"
+              }`}
+            >
               Book a Consultation
             </Link>
           </nav>
@@ -363,164 +451,189 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* ========================================== */}
-      {/* MOBILE COMPACT MODAL (Fits Content + Allows Page Scroll) */}
-      {/* ========================================== */}
-      {isMobileMenuOpen && (
-        <div className="lg:hidden bg-white w-full border-t border-gray-100 shadow-xl px-6 py-5 transition-all duration-300">
-          
-          {/* MENU LINKS CONTAINER */}
-          <div className="space-y-1 text-[#002B66]">
-            
-            {/* 1. SERVICES ACCORDION */}
-            <div>
-              <button
-                onClick={() => setMobileServicesOpen(!mobileServicesOpen)}
-                className="w-full flex items-center justify-between py-2 text-[16px] font-semibold text-[#002B66] hover:text-[#2BB673] transition-colors"
-              >
-                <span>Services</span>
-                <svg
-                  className={`w-4 h-4 text-[#002B66]/60 transition-transform duration-200 ${
-                    mobileServicesOpen ? "rotate-180 text-[#002B66]" : ""
+      {/* MOBILE COMPACT MODAL */}
+      <AnimatePresence>
+        {isMobileMenuOpen && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
+            className="lg:hidden bg-white w-full border-t border-gray-100 shadow-xl px-6 py-5 overflow-hidden"
+          >
+            <div className="space-y-1 text-[#002B66]">
+              
+              {/* 1. SERVICES ACCORDION */}
+              <div>
+                <button
+                  onClick={() => setMobileServicesOpen(!mobileServicesOpen)}
+                  className={`w-full flex items-center justify-between py-2 text-[16px] font-semibold transition-colors ${
+                    isServicesActive() ? "text-[#2BB673]" : "text-[#002B66] hover:text-[#2BB673]"
                   }`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={mobileServicesOpen ? "M19 9l-7 7-7-7" : "M9 5l7 7-7 7"} />
-                </svg>
-              </button>
+                  <span>Services</span>
+                  <svg
+                    className={`w-4 h-4 text-[#002B66]/60 transition-transform duration-200 ${
+                      mobileServicesOpen ? "rotate-180 text-[#002B66]" : ""
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={mobileServicesOpen ? "M19 9l-7 7-7-7" : "M9 5l7 7-7 7"} />
+                  </svg>
+                </button>
 
-              {/* SERVICES SUB-MENU (EXPANDS IN PLACE WITH BRAND DARK BLUE BORDER) */}
-              {mobileServicesOpen && (
-                <div className="mt-2 ml-2 pl-4 border-l-2 border-[#002B66]/20 space-y-3">
-                  {servicesList.map((service, idx) => (
-                    <Link
-                      key={idx}
-                      href={service.href}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center gap-3 py-1 text-[#002B66]/80 hover:text-[#002B66] font-medium text-[15px] transition-colors"
-                    >
-                      <span className="text-[#002B66]">{service.icon}</span>
-                      <span>{service.title}</span>
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
+                {mobileServicesOpen && (
+                  <div className="mt-2 ml-2 pl-4 border-l-2 border-[#002B66]/20 space-y-3">
+                    {servicesList.map((service, idx) => {
+                      const isSubActive = isActive(service.href);
+                      return (
+                        <Link
+                          key={idx}
+                          href={service.href}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className={`flex items-center gap-3 py-1 font-medium text-[15px] transition-colors ${
+                            isSubActive ? "text-[#2BB673] font-bold" : "text-[#002B66]/80 hover:text-[#002B66]"
+                          }`}
+                        >
+                          <span className={isSubActive ? "text-[#2BB673]" : "text-[#002B66]"}>{service.icon}</span>
+                          <span>{service.title}</span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
 
-            {/* 2. BRAND ONBOARDING */}
-            <div>
-              <Link
-                href="/brand-onboarding"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="block py-2 text-[16px] font-semibold text-[#002B66] hover:text-[#2BB673] transition-colors"
-              >
-                Brand Onboarding
-              </Link>
-            </div>
-
-            {/* 3. FREE AUDIT */}
-            <div>
-              <Link
-                href="/free-audit"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="block py-2 text-[16px] font-semibold text-[#002B66] hover:text-[#2BB673] transition-colors"
-              >
-                Free Audit
-              </Link>
-            </div>
-
-            {/* 4. CASE STUDIES ACCORDION */}
-            <div>
-              <button
-                onClick={() => setMobileCaseStudiesOpen(!mobileCaseStudiesOpen)}
-                className="w-full flex items-center justify-between py-2 text-[16px] font-semibold text-[#002B66] hover:text-[#2BB673] transition-colors"
-              >
-                <span>Case Studies</span>
-                <svg
-                  className={`w-4 h-4 text-[#002B66]/60 transition-transform duration-200 ${
-                    mobileCaseStudiesOpen ? "rotate-180 text-[#002B66]" : ""
+              {/* 2. BRAND ONBOARDING */}
+              <div>
+                <Link
+                  href="/brand-onboarding"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`block py-2 text-[16px] font-semibold transition-colors ${
+                    isActive("/brand-onboarding") ? "text-[#2BB673]" : "text-[#002B66] hover:text-[#2BB673]"
                   }`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={mobileCaseStudiesOpen ? "M19 9l-7 7-7-7" : "M9 5l7 7-7 7"} />
-                </svg>
-              </button>
+                  Brand Onboarding
+                </Link>
+              </div>
 
-              {/* CASE STUDIES SUB-MENU */}
-              {mobileCaseStudiesOpen && (
-                <div className="mt-2 ml-2 pl-4 border-l-2 border-[#002B66]/20 space-y-3">
-                  {caseStudiesList.map((item, idx) => (
-                    <Link
-                      key={idx}
-                      href={item.href}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className="flex items-center justify-between py-1 text-[#002B66]/80 hover:text-[#002B66] font-medium text-[15px] transition-colors"
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <span className="text-[#002B66]">{item.icon}</span>
-                        <span>{item.company}</span>
-                      </div>
-                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${item.badgeStyle}`}>
-                        {item.badge}
-                      </span>
-                    </Link>
-                  ))}
-                </div>
-              )}
+              {/* 3. FREE AUDIT */}
+              <div>
+                <Link
+                  href="/free-audit"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`block py-2 text-[16px] font-semibold transition-colors ${
+                    isActive("/free-audit") ? "text-[#2BB673]" : "text-[#002B66] hover:text-[#2BB673]"
+                  }`}
+                >
+                  Free Audit
+                </Link>
+              </div>
+
+              {/* 4. CASE STUDIES ACCORDION */}
+              <div>
+                <button
+                  onClick={() => setMobileCaseStudiesOpen(!mobileCaseStudiesOpen)}
+                  className={`w-full flex items-center justify-between py-2 text-[16px] font-semibold transition-colors ${
+                    isCaseStudiesActive() ? "text-[#2BB673]" : "text-[#002B66] hover:text-[#2BB673]"
+                  }`}
+                >
+                  <span>Case Studies</span>
+                  <svg
+                    className={`w-4 h-4 text-[#002B66]/60 transition-transform duration-200 ${
+                      mobileCaseStudiesOpen ? "rotate-180 text-[#002B66]" : ""
+                    }`}
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={mobileCaseStudiesOpen ? "M19 9l-7 7-7-7" : "M9 5l7 7-7 7"} />
+                  </svg>
+                </button>
+
+                {mobileCaseStudiesOpen && (
+                  <div className="mt-2 ml-2 pl-4 border-l-2 border-[#002B66]/20 space-y-3">
+                    {caseStudiesList.map((item, idx) => {
+                      const isSubActive = isActive(item.href);
+                      return (
+                        <Link
+                          key={idx}
+                          href={item.href}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className={`flex items-center justify-between py-1 font-medium text-[15px] transition-colors ${
+                            isSubActive ? "text-[#2BB673] font-bold" : "text-[#002B66]/80 hover:text-[#002B66]"
+                          }`}
+                        >
+                          <div className="flex items-center gap-2.5">
+                            <span className={isSubActive ? "text-[#2BB673]" : "text-[#002B66]"}>{item.icon}</span>
+                            <span>{item.company}</span>
+                          </div>
+                          <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${item.badgeStyle}`}>
+                            {item.badge}
+                          </span>
+                        </Link>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* 5. BLOG */}
+              <div>
+                <Link
+                  href="/blog"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`block py-2 text-[16px] font-semibold transition-colors ${
+                    isActive("/blog") ? "text-[#2BB673]" : "text-[#002B66] hover:text-[#2BB673]"
+                  }`}
+                >
+                  Blog
+                </Link>
+              </div>
+
+              {/* 6. CAREERS */}
+              <div>
+                <Link
+                  href="/careers"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`block py-2 text-[16px] font-semibold transition-colors ${
+                    isActive("/careers") ? "text-[#2BB673]" : "text-[#002B66] hover:text-[#2BB673]"
+                  }`}
+                >
+                  Careers
+                </Link>
+              </div>
+
+              {/* 7. BOOK A CONSULTATION */}
+              <div>
+                <Link
+                  href="/book-consultation"
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className={`block py-2 text-[16px] font-semibold transition-colors ${
+                    isActive("/book-consultation") ? "text-[#2BB673]" : "text-[#002B66] hover:text-[#2BB673]"
+                  }`}
+                >
+                  Book a Consultation
+                </Link>
+              </div>
+
             </div>
 
-            {/* 5. BLOG */}
-            <div>
+            {/* DARK BLUE BUTTON */}
+            <div className="pt-6 pb-2">
               <Link
-                href="/blog"
+                href="/login"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="block py-2 text-[16px] font-semibold text-[#002B66] hover:text-[#2BB673] transition-colors"
+                className="block w-full py-3.5 text-center font-bold text-white bg-[#002B66] hover:bg-[#001D47] rounded-xl shadow-md transition-all text-base"
               >
-                Blog
+                Login to App
               </Link>
             </div>
 
-            {/* 6. CAREERS */}
-            <div>
-              <Link
-                href="/careers"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="block py-2 text-[16px] font-semibold text-[#002B66] hover:text-[#2BB673] transition-colors"
-              >
-                Careers
-              </Link>
-            </div>
-
-            {/* 7. BOOK A CONSULTATION */}
-            <div>
-              <Link
-                href="/book-consultation"
-                onClick={() => setIsMobileMenuOpen(false)}
-                className="block py-2 text-[16px] font-semibold text-[#002B66] hover:text-[#2BB673] transition-colors"
-              >
-                Book a Consultation
-              </Link>
-            </div>
-
-          </div>
-
-          {/* DARK BLUE BUTTON */}
-          <div className="pt-6 pb-2">
-            <Link
-              href="/login"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="block w-full py-3.5 text-center font-bold text-white bg-[#002B66] hover:bg-[#001D47] rounded-xl shadow-md transition-all text-base"
-            >
-              Login to App
-            </Link>
-          </div>
-
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
     </header>
   );
